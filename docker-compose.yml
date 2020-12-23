@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  demo01:
+    image: demo01:latest
+    container_name: demo01
+#    environment:
+#      - AUTH_USER=${AUTH_USER}
+    expose:
+      - 8080
+    ports:
+      - 8085:8080
+#    links:
+#      - config-server
+#    depends_on:
+#      - config-server
+
+#  config-server:
+#    image: config-server:latest
+#    container_name: config-server
+#    environment:
+#      - BITBUCKET_USER=${BITBUCKET_USER}
+#      - BITBUCKET_PASS=${BITBUCKET_PASS}
+#      - BITBUCKET_URI=${BITBUCKET_URI}
+#      - AUTH_USER=${AUTH_USER}
+#      - AUTH_PASSWORD=${AUTH_PASSWORD}
+#      - LABEL=${LABEL}
+#  build:
+#    context: ../bioadvance-config-server
+#    dockerfile: _scm_container/bioadvance-config-server/Dockerfile
+#    args:
+#      - JNJ_ARTIFACTORY_USERNAME
+#      - JNJ_ARTIFACTORY_PASSWORD
+#  volumes:
+#    - ${HOST_PATH_SSH_CONFIG}:/home/spring/.ssh/config
+#    - ${HOST_PATH_SSH_IDENTITY}:/home/spring/.ssh/jnj-bitbucket-ssh
+#  ports:
+#    - 8888:8888
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: demo01_db
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d demo01_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - data-volume:/var/lib/postgresql/data
+      - ./docker/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432
+
+volumes:
+  data-volume:
